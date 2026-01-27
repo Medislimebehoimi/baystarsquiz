@@ -22,14 +22,19 @@
         .reset-btn { background-color: #ffffff; color: #000000; display: none; margin: 20px auto; }
         #result-image-container { display: none; margin: 20px auto; max-width: 450px; }
         #result-image-container img { width: 100%; border-radius: 10px; border: 4px solid var(--blue); }
-        #hint-display { margin-top: 20px; color: #00AEEF; font-weight: bold; min-height: 1.2em; }
+        
+        /* ヒントエリアの設定 */
+        #hint-container { margin-top: 20px; min-height: 2.8em; line-height: 1.4; }
+        #hint-display-1 { color: #00AEEF; font-weight: bold; }
+        #hint-display-2 { color: #FFD700; font-weight: bold; }
+
         .header-row { font-size: 10px; color: #818384; text-transform: uppercase; margin-bottom: 5px; }
     </style>
 </head>
 <body>
 
-    <h1>ベイスターズ　選手当てクイズ！</h1>
-    <p>各項目で、合ってたら緑、惜しかったら黄色くなります。年齢は±2歳、身長は±5cmで黄色判定です。年齢は２０２６年シーズン終了後（１２月３１日時点）のものです。</p>
+    <h1>ベイスターズ　選手当てクイズ</h1>
+    <p>各項目で正解すると緑になり、年齢と身長は惜しかったら黄色になります。年齢は±2歳、身長は±5cmで黄色判定です。また、年齢は２０２６年シーズン終了（１２月３１日）時点のものになります。</p>
 
     <div class="input-area" id="controls">
         <select id="playerSelect"><option value="">選手を選択...</option></select>
@@ -42,7 +47,11 @@
     </div>
 
     <button class="btn reset-btn" id="resetBtn" onclick="resetGame()">もう一度遊ぶ</button>
-    <div id="hint-display"></div>
+    
+    <div id="hint-container">
+        <div id="hint-display-1"></div>
+        <div id="hint-display-2"></div>
+    </div>
 
     <div class="grid" id="gameBoard">
         <div class="row header-row">
@@ -51,6 +60,7 @@
     </div>
 
 <script>
+// --- 画像設定：GitHub上のファイル名を指定 ---
 const IMG_EXCELLENT = "appare.jpg"; 
 const IMG_GOOD = "katsu.jpg";
 
@@ -92,7 +102,8 @@ const players = [
 
 let answer;
 let guessCount = 0;
-const hintDisplay = document.getElementById('hint-display');
+const hintDisplay1 = document.getElementById('hint-display-1');
+const hintDisplay2 = document.getElementById('hint-display-2');
 const playerSelect = document.getElementById('playerSelect');
 const resetBtn = document.getElementById('resetBtn');
 const submitBtn = document.getElementById('submitBtn');
@@ -103,7 +114,8 @@ const resultMsg = document.getElementById('result-message');
 function initGame() {
     answer = players[Math.floor(Math.random() * players.length)];
     guessCount = 0;
-    hintDisplay.innerText = "";
+    hintDisplay1.innerText = "";
+    hintDisplay2.innerText = "";
     resetBtn.style.display = "none";
     imageContainer.style.display = "none";
     submitBtn.disabled = false;
@@ -130,6 +142,7 @@ function submitGuess() {
     guessCount++;
     const guessPlayer = players.find(p => p.n === guessName);
     addResultRow(guessPlayer);
+
     if (guessName === answer.n) {
         winImage.src = (guessCount <= 5) ? IMG_EXCELLENT : IMG_GOOD;
         resultMsg.innerText = (guessCount <= 5) ? `${guessCount}手で正解！ハッハハハハ！` : `時間が長いよな。正解までの。${guessCount}手？待ってる時間長いで。ほんま。`;
@@ -137,8 +150,12 @@ function submitGuess() {
         submitBtn.disabled = true;
         playerSelect.disabled = true;
         resetBtn.style.display = "block";
-    } else if (guessCount % 5 === 0) {
-        giveHint();
+    } else {
+        if (guessCount === 5) {
+            giveHint(1);
+        } else if (guessCount === 10) {
+            giveHint(2);
+        }
     }
     playerSelect.value = "";
 }
@@ -149,13 +166,12 @@ function resetGame() {
     initGame();
 }
 
-function giveHint() {
-    const hintOptions = [
-        {l: "年齢", v: answer.a + "歳"},
-        {l: "身長", v: answer.s + "cm"}
-    ];
-    const picked = hintOptions[Math.floor(Math.random() * hintOptions.length)];
-    hintDisplay.innerText = `【５連続不正解……】ヒント：正解選手の「${picked.l}」は「${picked.v}」です。`;
+function giveHint(level) {
+    if (level === 1) {
+        hintDisplay1.innerText = `【５連続不正解】ヒント１：正解選手の「年齢」は「${answer.a}歳」です。`;
+    } else if (level === 2) {
+        hintDisplay2.innerText = `【１０連続不正解】ヒント２：正解選手の「身長」は「${answer.s}cm」です。`;
+    }
 }
 
 function addResultRow(p) {
@@ -164,24 +180,19 @@ function addResultRow(p) {
     row.className = 'row';
     const check = (val, target, type) => {
         if (val === target) return 'correct';
-        // 投打の「一部一致（黄色）」判定
         if (type === 'hand') { if (val[0] === target[0] || val[1] === target[1]) return 'near'; }
-        // 年齢と身長の「惜しい（黄色）」判定
         if (type === 'age' && Math.abs(val - target) <= 2) return 'near';
         if (type === 'height' && Math.abs(val - target) <= 5) return 'near';
         return 'wrong';
     };
-
     const cells = [
         {txt: p.n, cls: check(p.n, answer.n)},
-        // ★ ポジションは「完全一致」のみ緑、それ以外はグレー
-        {txt: p.p, cls: (p.p === answer.p ? 'correct' : 'wrong')},
+        {txt: p.p, cls: check(p.p, answer.p)},
         {txt: p.h, cls: check(p.h, answer.h, 'hand')},
         {txt: p.a + "歳", cls: check(p.a, answer.a, 'age')},
-        {txt: p.r, cls: (p.r === answer.r ? 'correct' : 'wrong')},
+        {txt: p.r, cls: check(p.r, answer.r)},
         {txt: p.s + "cm", cls: check(p.s, answer.s, 'height')}
     ];
-
     cells.forEach(c => {
         const div = document.createElement('div');
         div.className = 'cell ' + c.cls;
