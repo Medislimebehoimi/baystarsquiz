@@ -161,7 +161,7 @@ function submitGuess() {
     if (guessName === answer.n) {
         winImage.src = (guessCount <= 5) ? IMG_EXCELLENT : IMG_GOOD;
         imageContainer.style.display = "block";
-        resultMsg.innerText = (guessCount <= 5) ? `${guessCount}手で正解！＼横浜優勝／` : `${guessCount}手か…次はもっと早く当ててくれよな！`;
+        resultMsg.innerText = (guessCount <= 5) ? `${guessCount}手で正解！絶好調！` : `${guessCount}手`;
         endGame();
     } else {
         if (guessCount === 5) giveHint(1);
