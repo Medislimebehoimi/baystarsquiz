@@ -28,8 +28,8 @@
 </head>
 <body>
 
-    <h1>BAYSTARS QUIZ</h1>
-    <p>各項目で、合ってたら緑、惜しかったら黄色くなります。年齢は±2歳、身長は±5cmで黄色判定です。また、年齢は２０２６年シーズン終了時点（１２月３１日）のものになります。</p>
+    <h1>ベイスターズ　選手当てクイズ！</h1>
+    <p>各項目で、合ってたら緑、惜しかったら黄色くなります。年齢は±2歳、身長は±5cmで黄色判定です。年齢は２０２６年シーズン終了後（１２月３１日時点）のものです。</p>
 
     <div class="input-area" id="controls">
         <select id="playerSelect"><option value="">選手を選択...</option></select>
@@ -164,19 +164,24 @@ function addResultRow(p) {
     row.className = 'row';
     const check = (val, target, type) => {
         if (val === target) return 'correct';
+        // 投打の「一部一致（黄色）」判定
         if (type === 'hand') { if (val[0] === target[0] || val[1] === target[1]) return 'near'; }
+        // 年齢と身長の「惜しい（黄色）」判定
         if (type === 'age' && Math.abs(val - target) <= 2) return 'near';
         if (type === 'height' && Math.abs(val - target) <= 5) return 'near';
         return 'wrong';
     };
+
     const cells = [
         {txt: p.n, cls: check(p.n, answer.n)},
-        {txt: (p.p === '投手' ? '投手' : '野手'), cls: check((p.p === '投手' ? '投手' : '野手'), (answer.p === '投手' ? '投手' : '野手'))},
+        // ★ ポジションは「完全一致」のみ緑、それ以外はグレー
+        {txt: p.p, cls: (p.p === answer.p ? 'correct' : 'wrong')},
         {txt: p.h, cls: check(p.h, answer.h, 'hand')},
         {txt: p.a + "歳", cls: check(p.a, answer.a, 'age')},
-        {txt: p.r, cls: check(p.r, answer.r)},
+        {txt: p.r, cls: (p.r === answer.r ? 'correct' : 'wrong')},
         {txt: p.s + "cm", cls: check(p.s, answer.s, 'height')}
     ];
+
     cells.forEach(c => {
         const div = document.createElement('div');
         div.className = 'cell ' + c.cls;
