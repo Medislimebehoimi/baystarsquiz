@@ -47,7 +47,7 @@
 
     <div class="grid" id="gameBoard">
         <div class="row header-row">
-            <div>選手名</div><div>ポジ</div><div>投打</div><div>生年</div><div>経緯</div><div>身長</div>
+    <div>選手名</div><div>ポジ</div><div>投打</div><div>年齢</div><div>経緯</div><div>身長</div>
         </div>
     </div>
 
@@ -153,9 +153,11 @@ function resetGame() {
 
 function giveHint() {
     const hintOptions = [
-        {l: "生年", v: answer.y + "年"},
+        {l: "年齢", v: (2026 - answer.y) + "歳"}, // 生年から年齢を逆算
         {l: "身長", v: answer.s + "cm"}
     ];
+    // ...以下略
+}
     const picked = hintOptions[Math.floor(Math.random() * hintOptions.length)];
     hintDisplay.innerText = `【５連続不正解……】ヒント：正解選手の「${picked.l}」は「${picked.v}」です。`;
 }
