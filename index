@@ -54,7 +54,7 @@
 <script>
 // --- 画像設定：GitHubに上げたファイル名を指定 ---
 const IMG_EXCELLENT = "appare.jpg"; 
-const IMG_GOOD = "katsu.png";
+const IMG_GOOD = "katsu.jpg";
 
 const players = [
     {n:"デュプランティエ",p:"投手",h:"右左",y:1994,r:"海外",s:193}, {n:"東克樹",p:"投手",h:"左左",y:1995,r:"大卒",s:170},
